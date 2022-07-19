@@ -1,10 +1,15 @@
 import BigNumber from "bignumber.js";
 var Web3 = require('web3');
+import Web3Modal from 'web3modal';
+// import config from './wallet';
+
 BigNumber.config({ EXPONENTIAL_AT: 60 });
 
 let userAddress
 let web3Wallet
 let web3Guest
+let web3Modal
+let web3
 
 export const getUserAddress = async () => {
   try {
@@ -23,21 +28,35 @@ export const getUserAddress = async () => {
 export const connectWallet = async () => {
 
     try {
-      const { ethereum } = window; // ethereum - metamask
-      if (!ethereum) {
-        console.log('metamask is not install')
-        return false;
-      }
-      web3Wallet = new Web3(ethereum); // init web3
-      if (await web3Wallet.eth.getCoinbase() === null) { // проверяем подключен ли metamask
-        await ethereum.enable(); // подключить metamask
-      }
-      userAddress = await web3Wallet.eth.getCoinbase(); // получить адрес пользователя
-      let chainId = await web3Wallet.eth.net.getId(); // запись сети
-      if (+chainId !== 4) {
-        console.log('current project work on rinkeby network')
-        return false;
-      }  
+      // const { providerOptions } = config;
+      web3Modal = new Web3Modal({
+        // providerOptions, // required
+      });
+
+      const provider = await web3Modal.connect();
+      await provider.enable();
+      web3 = new Web3(provider);
+      userAddress = await web3.eth.getCoinbase();
+
+
+
+
+      // console.log('metamask connect');
+      // const { ethereum } = window; // ethereum - metamask
+      // if (!ethereum) {
+      //   console.log('metamask is not install')
+      //   return false;
+      // }
+      // web3Wallet = new Web3(ethereum); // init web3
+      // if (await web3Wallet.eth.getCoinbase() === null) { // проверяем подключен ли metamask
+      //   await ethereum.enable(); // подключить metamask
+      // }
+      // userAddress = await web3Wallet.eth.getCoinbase(); // получить адрес пользователя
+      // let chainId = await web3Wallet.eth.net.getId(); // запись сети
+      // if (+chainId !== 4) {
+      //   console.log('current project work on rinkeby network')
+      //   return false;
+      // }  
       return true;
     } catch (err) {
       console.log(err);
@@ -52,8 +71,10 @@ export const connectNode = () => {
       if (process.env.IS_MAINNET === 'true') {
         bscUrl = 'https://rpc.ankr.com/eth'
       } else {
-        bscUrl = 'https://rpc.ankr.com/eth_rinkeby'
+        // bscUrl = 'https://rpc.ankr.com/eth_rinkeby'
+        bscUrl = 'https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'
       }
+      console.log('bscUrl', bscUrl);
       const provider = new Web3.providers.HttpProvider(bscUrl)
       web3Guest = new Web3(provider)
       return true
@@ -108,7 +129,7 @@ export const getBalance = async (abi, token) => {
 export const approve = async (token, recipient, amount, abi, decimals) => {
   try {
     console.log(userAddress);
-      const instanceContract = await new web3Guest.eth.Contract(abi, token)
+      const instanceContract = await new web3.eth.Contract(abi, token)
       console.log('instanceContract ', instanceContract );
       const total = new BigNumber(amount).shiftedBy(+decimals).toString();
       console.log(recipient, total);

@@ -14,6 +14,6 @@ export default new Vuex.Store({
   modules: {
   },
   getters: {
-    TEST: state => state.test
+    // TEST: state => state.test
   }
 })
