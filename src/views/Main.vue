@@ -30,7 +30,7 @@ import { connectWallet,
  fetchContractData, 
  connectNode, 
  getBalance, 
- getUserAddress,
+//  getUserAddress,
  approve,
  getAllowance,
  transfer
@@ -79,7 +79,7 @@ export default {
   methods: {
     async initWallet() {
       await connectNode()
-      await getUserAddress()
+      // await getUserAddress()
       let aboutTokens = []
       this.tokens.forEach(async function(token) {
           let symbol = await fetchContractData('symbol', ERC20Abi, token)
